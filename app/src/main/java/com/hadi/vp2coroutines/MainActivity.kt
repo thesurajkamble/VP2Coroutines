@@ -1,14 +1,24 @@
 package com.hadi.vp2coroutines
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.palette.graphics.Palette
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import coil.ImageLoader
 import coil.load
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import coil.transform.BlurTransformation
 import com.hadi.vp2coroutines.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -18,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private var imagesList = mutableListOf<String>()
     private lateinit var sliderAdapter: SliderAdapter
     private lateinit var itemDecoration: HorizontalMarginItemDecoration
-
+    private var imageListGenerate = mutableListOf<ImageColorsGenerate>()
     val imageDataList = listOf(
         ImageData(1, R.drawable.clash_of_clans_archer),
         ImageData(2, R.drawable.pngwing_3),
@@ -87,19 +97,38 @@ class MainActivity : AppCompatActivity() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
 
-                    val color = (Math.random() * 16777215).toInt() or (0xFF shl 24)
-                    binding.containerConstraint.setBackgroundColor(color)
+//                    val color = (Math.random() * 16777215).toInt() or (0xFF shl 24)
+                    //set Rand Color
+//                    binding.containerConstraint.setBackgroundColor(color)
+
 
 //                    val currentImage = imagesList.get(position)
-                    val currentImage = imagesList.get(position).toInt()
+                    val currentImage = imagesList[position].toInt()
 
 //                    binding.containerConstraint.setBackgroundResource(currentImage)
 
-
+                    //region COLOR GENER M 1
+                    //color from Image
 //                    val imageSelected = BitmapFactory.decodeResource(
 //                        resources,
 //                        currentImage
 //                    )
+//                    setToolbarColor(imageSelected)
+                    //endregion
+
+                    //region COLOR GENER M 2
+//                    createPaletteAsync(
+//                        (ContextCompat.getDrawable(
+//                            context,
+//                            currentImage
+//                        ) as BitmapDrawable).bitmap
+//                    )
+                    //endregion
+
+
+                    val colorGenerate= imageListGenerate[position].colorGenerate
+
+                    binding.containerConstraint.setBackgroundColor(colorGenerate)
 
                     binding.imageContainerBlur.load(currentImage) {
 
@@ -110,37 +139,40 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-//        binding.viewpager.registerOnPageChangeCallback(
-//            object : OnPageChangeCallback() {
-//                override fun onPageScrolled(
-//                    position: Int,
-//                    positionOffset: Float,
-//                    positionOffsetPixels: Int,
-//                ) {
-//                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-//                    //                countTxtView.setText(String.format(Locale.ENGLISH,"%d/%d", position+1, matchCourseList.size()));
-//
-//                }
-//
-//                override fun onPageSelected(position: Int) {
-//                    super.onPageSelected(position)
-//
-//                    val color = (Math.random() * 16777215).toInt() or (0xFF shl 24)
-//                    binding.containerConstraint.setBackgroundColor(color)
-//                }
-//            })
+
     }
 
+    // Generate palette synchronously and return it
+    fun createPaletteSync(bitmap: Bitmap): Palette = Palette.from(bitmap).generate()
 
-    val links = listOf(
-        "https://images.freeimages.com/images/large-previews/825/linked-hands-1308777.jpg",
-        "https://images.unsplash.com/photo-1541443131876-44b03de101c5?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&dl=mathieu-renier-4WBvCqeMaDE-unsplash.jpg",
-        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&dl=roberto-nickson-zu95jkyrGtw-unsplash.jpg",
-        "https://www.cnet.com/a/img/XtH050ErlMIQxKn_HYUx2plJnDc=/940x528/2020/12/17/c9a829c8-69d6-4299-b2d0-cf9624aa7556/2021-acura-tlx-a-spec-65.jpg",
-        "https://cdn.jdpower.com/JDPA_2021%20Acura%20TLX%20Advance%20Red%20Front%20View.jpg",
-        "https://s3-us-east-2.amazonaws.com/matter-blog/2020/09/People_Person_Cover_Image.png",
-        "https://images.fandango.com/ImageRenderer/0/0/redesign/static/img/default_poster.png/0/images/masterrepository/other/ant_man_ver5.jpg"
-    )
+
+    fun createPaletteAsync(bitmap: Bitmap) {
+        Palette.from(bitmap).generate { palette ->
+            binding.containerConstraint.apply {
+                setBackgroundColor(
+                    (palette?.vibrantSwatch?.rgb ?: ContextCompat.getColor(
+                        baseContext,
+                        R.color.purple_200
+                    ))
+                )
+            }
+
+
+        }
+    }
+
+    private fun setToolbarColor(bitmap: Bitmap) {
+        // Generate the palette and get the vibrant swatch
+        val vibrantSwatch = createPaletteSync(bitmap).vibrantSwatch
+        val vibrantSwatch_2 = createPaletteSync(bitmap).darkVibrantSwatch
+
+        binding.containerConstraint.setBackgroundColor(
+            (vibrantSwatch?.rgb ?: ContextCompat.getColor(
+                baseContext,
+                R.color.purple_200
+            ))
+        )
+    }
 
     private fun setupAdapter() {
         sliderAdapter.setImages(imagesList)
@@ -149,9 +181,89 @@ class MainActivity : AppCompatActivity() {
 
     data class ImageData(val id: Int, @DrawableRes val imageResource: Int)
 
+    data class ImageColorsGenerate(@DrawableRes val imageResGenerate: Int, val colorGenerate: Int)
+
+
+
+    fun ImageData.toGenerateColorsDrawableImage(): ImageColorsGenerate {
+        val imageSelected = BitmapFactory.decodeResource(
+            resources,
+            imageResource
+        )
+        //from url
+
+//        val imageSelectedURl = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageResource+"")
+
+        val color= createPaletteSync(imageSelected).vibrantSwatch
+
+        val colorGenerate= (color?.rgb ?: ContextCompat.getColor(
+            baseContext,
+            R.color.purple_200
+        ))
+
+        return ImageColorsGenerate(
+
+            imageResGenerate = imageResource,
+            colorGenerate = colorGenerate
+
+        )
+    }
+    fun String.removeFirstLastChar(): String =  this.substring(1, this.length - 1)
+
+    fun String.toGenerateColorsURLImage(): ImageUrlColorsGenerate {
+    var colorGenerate=0
+        lifecycleScope.launch{
+            val loader = ImageLoader(baseContext)
+            val request = ImageRequest.Builder(baseContext)
+                .data(this)
+                .allowHardware(false) // Disable hardware bitmaps.
+                .build()
+
+            val result = (loader.execute(request) as SuccessResult).drawable
+            val imageSelected = (result as BitmapDrawable).bitmap
+            val color= createPaletteSync(imageSelected).vibrantSwatch
+
+            colorGenerate= (color?.rgb ?: ContextCompat.getColor(
+                baseContext,
+                R.color.purple_200
+            ))
+        }
+
+//        val loader = ImageLoader(context = baseContext)
+//        val req = ImageRequest.Builder(baseContext)
+//            .data(this)
+//            .target { result ->
+//                val bitmap = (result as BitmapDrawable).bitmap
+//                val color= createPaletteSync(bitmap).vibrantSwatch
+//
+//                val colorGenerate= (color?.rgb ?: ContextCompat.getColor(
+//                    baseContext,
+//                    R.color.purple_200
+//                ))
+//            }
+//            .build()
+//        val disposable = loader.enqueue(req)
+
+
+
+
+        return ImageUrlColorsGenerate(
+            imageUrl = this,
+            colorGenerate = colorGenerate
+
+        )
+    }
+
+
+    data class ImageUrlColorsGenerate(val imageUrl: String, val colorGenerate: Int)
+
+
     private fun setupData() {
 
+        //GET LIST WITH COLORS
+        imageListGenerate= getListWithColors().toMutableList()
 
+//        questionListingsDto.map { it.toQuestionListing() }
 //        imagesList.addAll(links.map { imageData -> imageData })
         imagesList.addAll(imageDataList.map { imageData -> imageData.imageResource.toString() })
 
@@ -160,4 +272,11 @@ class MainActivity : AppCompatActivity() {
 //        imagesList.add("https://cdn.pixabay.com/photo/2021/03/04/15/29/river-6068374_960_720.jpg")
 //        imagesList.add("https://cdn.pixabay.com/photo/2021/03/29/08/22/peach-flower-6133330_960_720.jpg")
     }
+
+    private fun getListWithColors() = imageDataList.map { imageData ->
+        (imageData.toGenerateColorsDrawableImage())
+
+    }
+
+
 }

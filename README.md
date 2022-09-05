@@ -14,3 +14,8 @@
 
 # Courtesy
 #### Stackoverflow, Medium, Luciano Luzzi
+
+
+### helps
+Android Material Component: Toolbar vs DisplayCutou
+https://www.waseefakhtar.com/android/android-material-component-toolbar-vs-displaycutout/

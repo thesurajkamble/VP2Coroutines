@@ -3,4 +3,6 @@
         <dimen name="viewpager_next_item_visible">26dp</dimen>
         <dimen name="viewpager_current_item_horizontal_margin">36dp</dimen>
         <dimen name="item_decoration">36dp</dimen>
+    <dimen name="dimen_20">20dp</dimen>
+    <dimen name="dimen_10">10dp</dimen>
 </resources>

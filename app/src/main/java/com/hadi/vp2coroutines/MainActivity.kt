@@ -1,9 +1,16 @@
 package com.hadi.vp2coroutines
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowManager
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -45,9 +52,51 @@ class MainActivity : AppCompatActivity() {
         ImageData(13, R.drawable.pngwing_13),
         ImageData(14, R.drawable.pngwing_14)
     )
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            hideSystemUIAndNavigation(this)
+            adjustToolbarMarginForNotch()
+        }
+    }
+
+    private fun hideSystemUIAndNavigation(activity: Activity) {
+        val decorView: View = activity.window.decorView
+        decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_IMMERSIVE
+                    // Set the content to appear under the system bars so that the
+                    // content doesn't resize when the system bars hide and show.
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN // Hide the nav bar and status bar
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
+    }
+
+    @SuppressLint("NewApi")
+    private fun adjustToolbarMarginForNotch() {
+        // Notch is only supported by >= Android 9
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val windowInsets = window.decorView.rootWindowInsets
+            if (windowInsets != null) {
+                val displayCutout = windowInsets.displayCutout
+                if (displayCutout != null) {
+                    val safeInsetTop = displayCutout.safeInsetTop
+                    val newLayoutParams = binding.toolbar.layoutParams as ViewGroup.MarginLayoutParams
+                    newLayoutParams.setMargins(0, safeInsetTop, 0, 0)
+                    binding.toolbar.layoutParams = newLayoutParams
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -14,6 +15,10 @@ import androidx.palette.graphics.Palette
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
 import coil.transform.BlurTransformation
+import com.hadi.vp2coroutines.data.DotaHeroes
+import com.hadi.vp2coroutines.data.DotaHeroesName
+import com.hadi.vp2coroutines.data.dota2HeroesName
+import com.hadi.vp2coroutines.data.getHeroRole
 import com.hadi.vp2coroutines.databinding.ActivityUrlImagesBinding
 import com.hadi.vp2coroutines.remoteimages.RemoteSliderAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.URL
+import java.util.*
 
 class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
 
@@ -51,21 +57,32 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
         setupAdapter()
 
     }
+    private fun generateNames(){
+        val dotaNameParser= dota2HeroesName.map {
+            val nameParse= it.replace(" ","_").toLowerCase(Locale.getDefault())
 
+
+            val urlImage= "https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${nameParse}.png"
+            Log.e("Data",urlImage)
+            urlImage
+        }.toMutableList()
+        imagesList.addAll(dotaNameParser)
+    }
     private fun setupData() {
         //GET LIST WITH COLORS
         imageListGenerate = getListWithColors().toMutableList()
 //        https://www.johanneskueber.com/posts/android_coil_palette/
 //https://www.dota2.com/heroes
-//        imagesList.add("https://cdn.pixabay.com/photo/2020/12/10/09/22/beach-front-5819728_960_720.jpg")
-        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.png")
-        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.png")
+        //https://github.com/Den-dp/dota2-heroes/blob/master/src/dota2-heroes.json
 //        imagesList.add("gggg")
-        imagesList.add("https://www.pngplay.com/wp-content/uploads/11/Dota-2-PNG-HD-Free-File-Download.png")
-//        imagesList.add("https://w7.pngwing.com/pngs/274/546/png-transparent-dota-2-the-international-2016-desktop-drawing-tear-effect-miscellaneous-game-computer-wallpaper.png")
-        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.png")
-        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/zuus.png")
-        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.png")
+//        imagesList.add("https://cdn.pixabay.com/photo/2020/12/10/09/22/beach-front-5819728_960_720.jpg")
+        generateNames()
+//        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.png")
+//        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.png")
+//        imagesList.add("https://www.pngplay.com/wp-content/uploads/11/Dota-2-PNG-HD-Free-File-Download.png")
+//        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/slark.png")
+//        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/zuus.png")
+//        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lion.png")
 
 
 //        imagesList.add("https://cdn.pixabay.com/photo/2021/03/04/15/29/river-6068374_960_720.jpg")

@@ -42,6 +42,12 @@ class RemoteSliderAdapter(
 
     override fun getItemCount() = list.size
 
+    // onItemClickListener
+    private var onItemClickListener: ((Int) -> Unit)? = null
+    fun setOnItemClickListener(listener: (Int) -> Unit) {
+        onItemClickListener = listener
+    }
+
     class SliderViewHolder(val binding: ItemSliderBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(url: String) {

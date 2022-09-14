@@ -2,8 +2,11 @@ package com.hadi.vp2coroutines
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,12 +16,16 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.viewpager2.widget.ViewPager2
+import coil.ImageLoader
+import coil.bitmap.BitmapPool
 import coil.load
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import coil.size.Scale
+import coil.size.Size
 import coil.transform.BlurTransformation
-import com.hadi.vp2coroutines.data.DotaHeroes
-import com.hadi.vp2coroutines.data.DotaHeroesName
+import coil.transform.Transformation
 import com.hadi.vp2coroutines.data.dota2HeroesName
-import com.hadi.vp2coroutines.data.getHeroRole
 import com.hadi.vp2coroutines.databinding.ActivityUrlImagesBinding
 import com.hadi.vp2coroutines.remoteimages.RemoteSliderAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -57,26 +64,37 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
         setupAdapter()
 
     }
-    private fun generateNames(){
-        val dotaNameParser= dota2HeroesName.map {
-            val nameParse= it.replace(" ","_").toLowerCase(Locale.getDefault())
+
+    private fun generateNames() {
+        val dotaNameParser = dota2HeroesName.map {
+            val nameParse = it.replace(" ", "_").toLowerCase(Locale.getDefault())
 
 
-            val urlImage= "https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${nameParse}.png"
-            Log.e("Data",urlImage)
+            val urlImage =
+                "https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/${nameParse}.png"
+//            Log.e("Data", urlImage)
+
             urlImage
         }.toMutableList()
         imagesList.addAll(dotaNameParser)
+
+//        generateNewListWithColors()
     }
+
     private fun setupData() {
         //GET LIST WITH COLORS
-        imageListGenerate = getListWithColors().toMutableList()
+        Log.d("Main", "Antes")
+        generateNames()
+//        imageListGenerate = getListWithColors().toMutableList()
+//        generateNewListWithColors()
+
+        Log.d("Main", "Despues")
+        Log.d("UrlImagesActivity", "imageListGenerate $imageListGenerate")
 //        https://www.johanneskueber.com/posts/android_coil_palette/
 //https://www.dota2.com/heroes
         //https://github.com/Den-dp/dota2-heroes/blob/master/src/dota2-heroes.json
 //        imagesList.add("gggg")
 //        imagesList.add("https://cdn.pixabay.com/photo/2020/12/10/09/22/beach-front-5819728_960_720.jpg")
-        generateNames()
 //        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/lina.png")
 //        imagesList.add("https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/heroes/renders/bloodseeker.png")
 //        imagesList.add("https://www.pngplay.com/wp-content/uploads/11/Dota-2-PNG-HD-Free-File-Download.png")
@@ -90,8 +108,94 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
     }
 
     private fun getListWithColors() = imagesList.map { imageData ->
+        //Log.d("UrlImagesActivity_Map", imageData)
         (imageData.toGenerateColorsURLImage())
+//        (imageData.getColorsFromUrlImage())
 
+
+    }
+
+    fun URL.toBitmap(): Bitmap? {
+        return try {
+            BitmapFactory.decodeStream(openStream())
+        } catch (e: IOException) {
+            null
+        }
+    }
+
+    private fun generateNewListWithColors() {
+        Log.d(TAG, "M=>$imagesList")
+        imagesList.map { imageData ->
+//            Log.d(TAG, "each $imageData")
+            CoroutineScope(Job() + Dispatchers.IO).launch {
+                try {
+                    //-13571856
+                    val loader = ImageLoader(context = baseContext)
+                    val req = ImageRequest.Builder(baseContext)
+                        .data(imageData)
+                        .transformations(object : Transformation {
+                            override fun key() = "paletteTransformer"
+                            override suspend fun transform(
+                                pool: BitmapPool,
+                                input: Bitmap,
+                                size: Size,
+                            ): Bitmap {
+                                val palette = Palette.from(input).generate()
+
+                                val swatch = palette.vibrantSwatch
+                                Log.d(TAG, "RemoteAdapter" + palette.vibrantSwatch?.rgb.toString())
+                                if (swatch != null) {
+//                            itemView.setBackgroundColor(palette.vibrantSwatch?.rgb ?: ContextCompat.getColor(
+//                                itemView.context,
+//                                R.color.purple_200
+//                            ))
+                                }
+                                return input
+                            }
+
+
+                        }).crossfade(true)
+
+
+                        .scale(Scale.FIT)
+                        .build()
+
+
+//                    var image: Bitmap? = null
+//                    val url = URL(imageData)
+//                    val bitMap = url.toBitmap()
+//                    if (bitMap != null) {
+//                        image = Bitmap.createScaledBitmap(bitMap, 100, 100, true)
+//                        //D/RemoteAdapter: -13571856
+//
+//                        val palette = Palette.from(image).generate()
+//
+//                        val swatch = palette.vibrantSwatch
+//                        Log.d(TAG, "PALETTE" + palette.vibrantSwatch?.rgb.toString())
+//                        val colorGenerate = (palette.vibrantSwatch?.rgb ?: ContextCompat.getColor(
+//                            baseContext,
+//                            R.color.purple_200
+//                        ))
+//                        val heroNameImageColor = ImageUrlColorsGenerate(
+//                            imageUrl = imageData,
+//                            colorGenerate = colorGenerate
+//
+//                        )
+//                        Log.d(TAG, "O=>$heroNameImageColor")
+//                        imageListGenerate.add(
+//                            heroNameImageColor
+//                        )
+//                    }
+
+                } catch (e: IOException) {
+//                // Log exception
+                    Log.e("Error: ", e.message.toString())
+                }
+            }
+
+        }
+
+//        }
     }
 
     data class ImageUrlColorsGenerate(val imageUrl: String, val colorGenerate: Int)
@@ -101,6 +205,11 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
 
     fun createPaletteAsync(bitmap: Bitmap) {
         Palette.from(bitmap).generate { palette ->
+
+            if (palette != null) {
+                Log.d("createPaletteAsync", palette.vibrantSwatch?.rgb.toString())
+            }
+
             binding.containerConstraint.apply {
                 setBackgroundColor(
                     (palette?.vibrantSwatch?.rgb ?: ContextCompat.getColor(
@@ -114,27 +223,114 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
         }
     }
 
+    private suspend fun uriToBitmap(context: Context, uri: Uri?): Bitmap {
 
-    private fun String.toGenerateColorsURLImage(): ImageUrlColorsGenerate {
-        var colorGenerate = 0
-        var image: Bitmap? = null
-        CoroutineScope(Job() + Dispatchers.IO).launch {
-            try {
-                val url = URL(this@toGenerateColorsURLImage)
-                val bitMap = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-                image = Bitmap.createScaledBitmap(bitMap, 100, 100, true)
+        val loader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(uri)
+            .allowHardware(false) // Disable hardware bitmaps.
+            .build()
 
-                val color = createPaletteSync(bitMap).vibrantSwatch
-                val colorGenerate = (color?.rgb ?: ContextCompat.getColor(
+        val result = (loader.execute(request) as SuccessResult).drawable
+        val bitmap = (result as BitmapDrawable).bitmap
+
+        val resizedBitmap = Bitmap.createScaledBitmap(
+            bitmap, 80, 80, true);
+
+        return resizedBitmap
+    }
+
+    private fun String.getColorsFromUrlImage(): ImageUrlColorsGenerate {
+        CoroutineScope(Dispatchers.IO).launch {
+
+
+            val bitmap = uriToBitmap(
+                context = baseContext, uri = Uri.parse(this.toString())
+            )
+//            val color = createPaletteSync(bitmap).vibrantSwatch
+            val palette = createPaletteSync(bitmap)
+
+            Log.d("UrlImagesActivity", palette.vibrantSwatch?.rgb.toString())
+
+
+            binding.containerConstraint.setBackgroundColor(palette.vibrantSwatch?.rgb
+                ?: ContextCompat.getColor(
                     baseContext,
                     R.color.purple_200
                 ))
 
-                ImageUrlColorsGenerate(
-                    imageUrl = this@toGenerateColorsURLImage,
-                    colorGenerate = colorGenerate
+        }
+        return ImageUrlColorsGenerate(
+            imageUrl = this,
+            colorGenerate = 2
 
-                )
+        )
+    }
+
+    private fun String.toGenerateColorsURLImage(): ImageUrlColorsGenerate {
+        var colorGenerate = 0
+
+
+//        CoroutineScope(Job() + Dispatchers.IO).launch {
+//            try {
+//                val loader = ImageLoader(context = baseContext)
+//                val req = ImageRequest.Builder(baseContext)
+//                    .data(this)
+//                    .target { result ->
+//                        val bitmap = (result as BitmapDrawable).bitmap
+//                        val color = createPaletteSync(bitmap).vibrantSwatch
+//
+//                        Log.d("UrlImagesActivity Color", color?.rgb.toString())
+//                    }
+//                    .build()
+//                val disposable = loader.enqueue(req)
+//            } catch (e: IOException) {
+////                // Log exception
+//                Log.e("Error: ",e.localizedMessage)
+//            }
+//
+//
+//        }
+
+        CoroutineScope(Job() + Dispatchers.IO).launch {
+            try {
+
+                //-13571856
+                val loader = ImageLoader(context = baseContext)
+                val req = ImageRequest.Builder(baseContext)
+                    .data(this)
+                    .target { result ->
+                        val bitmap = (result as BitmapDrawable).bitmap
+                        val color = createPaletteSync(bitmap).vibrantSwatch
+
+                        Log.d("UrlImagesActivity Color", color?.rgb.toString())
+                    }
+                    .build()
+                val disposable = loader.enqueue(req)
+
+//                var image: Bitmap? = null
+//
+//                val url = URL(this@toGenerateColorsURLImage)
+//                val bitMap = BitmapFactory.decodeStream(url.openConnection().getInputStream())
+//                image = Bitmap.createScaledBitmap(bitMap, 100, 100, true)
+//                //D/RemoteAdapter: -13571856
+////                val color = createPaletteSync(bitMap).vibrantSwatch
+//                val palette = Palette.from(image).generate()
+//
+//                val swatch = palette.vibrantSwatch
+//                Log.d("UrlImagesActivity Color", palette.vibrantSwatch?.rgb.toString())
+//
+//                val colorGenerate = (palette.vibrantSwatch?.rgb ?: ContextCompat.getColor(
+//                    baseContext,
+//                    R.color.purple_200
+//                ))
+//                imageListGenerate.add(
+//                    ImageUrlColorsGenerate(
+//                        imageUrl = this@toGenerateColorsURLImage,
+//                        colorGenerate = colorGenerate
+//
+//                    )
+//                )
 
             } catch (e: IOException) {
                 // Log exception
@@ -146,6 +342,39 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
             colorGenerate = colorGenerate
 
         )
+    }
+
+    private suspend fun getBitmap(context: Context, url: String): Bitmap? {
+        var bitmap: Bitmap? = null
+        val request = ImageRequest.Builder(context)
+            .data(url)
+            .transformations(object : Transformation {
+                override fun key() = "paletteTransformer"
+                override suspend fun transform(
+                    pool: BitmapPool,
+                    input: Bitmap,
+                    size: Size,
+                ): Bitmap {
+                    val palette = Palette.from(input).generate()
+
+                    val swatch = palette.vibrantSwatch
+                    Log.d(TAG, "paleta " + palette.vibrantSwatch?.rgb.toString())
+                    if (swatch != null) {
+//                            itemView.setBackgroundColor(palette.vibrantSwatch?.rgb ?: ContextCompat.getColor(
+//                                itemView.context,
+//                                R.color.purple_200
+//                            ))
+                    }
+                    return input
+                }
+
+
+            }).crossfade(true)
+            .scale(Scale.FIT)
+            .build()
+
+
+        return bitmap
     }
 
     private fun setupAdapter() {
@@ -208,7 +437,14 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
                 ) {
                     super.onPageScrolled(position, positionOffset, positionOffsetPixels)
                     //                countTxtView.setText(String.format(Locale.ENGLISH,"%d/%d", position+1, matchCourseList.size()));
-
+//                    val currentImage = imagesList[position]
+//                    binding.imageContainerBlur.load(currentImage) {
+//
+//                        transformations(BlurTransformation(context, radius = 24f, sampling = 2f))
+//
+//
+//                    }
+                    Log.d(TAG, "onPageScrolled")
                 }
 
                 override fun onPageSelected(position: Int) {
@@ -216,25 +452,50 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
 
 
                     val currentImage = imagesList[position]
+//                    Log.d("UrlImagesActivity", "imageListGenerate $imageListGenerate")
 
 
-                    //region COLOR GENER M 2
-//                    createPaletteAsync(
-//                        (ContextCompat.getDrawable(
-//                            context,
-//                            currentImage
-//                        ) as BitmapDrawable).bitmap
-//                    )
-                    //endregion
 
+                    if (imageListGenerate.isNotEmpty()) {
+                        val colorGenerate = imageListGenerate[position].colorGenerate
+                        binding.containerConstraint.setBackgroundColor(colorGenerate)
+                    }
 
-//                    val colorGenerate = imageListGenerate[position].colorGenerate
-//
-//                    binding.containerConstraint.setBackgroundColor(colorGenerate)
 
                     binding.imageContainerBlur.load(currentImage) {
 
-                        transformations(BlurTransformation(context, radius = 24f, sampling = 2f))
+//                        transformations(BlurTransformation(context, radius = 24f, sampling = 2f))
+
+                        transformations(BlurTransformation(context, radius = 24f, sampling = 2f),
+                            object : Transformation {
+                                override fun key() = "paletteTransformer"
+                                override suspend fun transform(
+                                    pool: BitmapPool,
+                                    input: Bitmap,
+                                    size: Size,
+                                ): Bitmap {
+                                    val palette = Palette.from(input).generate()
+
+                                    val swatch = palette.vibrantSwatch
+                                    Log.d(TAG,"UrlImage"+ palette.vibrantSwatch?.rgb.toString())
+//                                    if (swatch != null) {
+//                                        binding.containerConstraint.setBackgroundColor(palette.vibrantSwatch?.rgb
+//                                            ?: ContextCompat.getColor(
+//                                                context,
+//                                                R.color.purple_200
+//                                            ))
+//                                    }
+                                    return input
+                                }
+
+
+                            }
+                        )
+                        crossfade(true)
+
+
+                        scale(Scale.FIT)
+                        build()
                     }
                 }
             })
@@ -242,5 +503,9 @@ class UrlImagesActivity : AppCompatActivity(R.layout.activity_url_images) {
         }
 
 
+    }
+
+    companion object {
+        const val TAG = "UrlImagesActivity"
     }
 }

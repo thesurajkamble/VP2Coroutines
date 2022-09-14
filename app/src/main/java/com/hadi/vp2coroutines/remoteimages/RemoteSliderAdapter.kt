@@ -2,9 +2,9 @@ package com.hadi.vp2coroutines.remoteimages
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
@@ -12,8 +12,6 @@ import coil.bitmap.BitmapPool
 import coil.load
 import coil.size.Scale
 import coil.size.Size
-import coil.transform.CircleCropTransformation
-import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.hadi.vp2coroutines.R
 import com.hadi.vp2coroutines.databinding.ItemSliderBinding
@@ -63,6 +61,7 @@ class RemoteSliderAdapter(
                         val palette = Palette.from(input).generate()
 
                         val swatch = palette.vibrantSwatch
+                        Log.d("RemoteAdapter",palette.vibrantSwatch?.rgb.toString())
                         if (swatch != null) {
                             itemView.setBackgroundColor(palette.vibrantSwatch?.rgb ?: ContextCompat.getColor(
                                 itemView.context,

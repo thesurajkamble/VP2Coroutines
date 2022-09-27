@@ -10,7 +10,7 @@
 
 
     android:background="@color/black"
-    tools:context=".MainActivity">
+    tools:context=".ui.MainActivity">
 <!--    app:navigationIcon="@drawable/ic_clear_circle_outlined"-->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"

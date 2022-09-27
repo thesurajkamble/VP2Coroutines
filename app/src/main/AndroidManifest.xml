@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VP2Coroutines">
         <activity
-            android:name=".UrlImagesActivity"
+            android:name=".ui.UrlImagesActivity"
             android:exported="false" />
         <activity
             android:name=".ui.HomeActivity"
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:theme="@style/AppTheme.Fullscreen"
             android:exported="true">
 <!--            <intent-filter>-->

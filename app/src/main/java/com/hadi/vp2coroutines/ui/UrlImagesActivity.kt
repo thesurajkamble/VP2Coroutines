@@ -1,4 +1,4 @@
-package com.hadi.vp2coroutines
+package com.hadi.vp2coroutines.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -25,9 +25,12 @@ import coil.size.Scale
 import coil.size.Size
 import coil.transform.BlurTransformation
 import coil.transform.Transformation
+import com.hadi.vp2coroutines.utils.HorizontalMarginItemDecoration
+import com.hadi.vp2coroutines.R
+import com.hadi.vp2coroutines.autoScroll
 import com.hadi.vp2coroutines.data.dota2HeroesName
 import com.hadi.vp2coroutines.databinding.ActivityUrlImagesBinding
-import com.hadi.vp2coroutines.remoteimages.RemoteSliderAdapter
+import com.hadi.vp2coroutines.setCarouselEffects
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

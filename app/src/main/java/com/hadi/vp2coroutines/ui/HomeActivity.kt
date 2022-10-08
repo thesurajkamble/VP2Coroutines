@@ -3,9 +3,7 @@ package com.hadi.vp2coroutines.ui
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.hadi.vp2coroutines.MainActivity
 import com.hadi.vp2coroutines.R
-import com.hadi.vp2coroutines.UrlImagesActivity
 import com.hadi.vp2coroutines.databinding.ActivityHomeBinding
 
 class HomeActivity : AppCompatActivity(R.layout.activity_home) {

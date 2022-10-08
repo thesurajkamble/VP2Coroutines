@@ -1,4 +1,4 @@
-package com.hadi.vp2coroutines
+package com.hadi.vp2coroutines.ui
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -9,12 +9,9 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import androidx.viewpager2.widget.ViewPager2
@@ -24,7 +21,9 @@ import coil.load
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.transform.BlurTransformation
+import com.hadi.vp2coroutines.*
 import com.hadi.vp2coroutines.databinding.ActivityMainBinding
+import com.hadi.vp2coroutines.utils.HorizontalMarginItemDecoration
 import kotlinx.coroutines.launch
 
 

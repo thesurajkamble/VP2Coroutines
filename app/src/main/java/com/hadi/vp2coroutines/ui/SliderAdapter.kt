@@ -1,14 +1,11 @@
-package com.hadi.vp2coroutines
+package com.hadi.vp2coroutines.ui
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.DrawableRes
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.size.Scale
-import coil.transform.CircleCropTransformation
-import coil.transform.RoundedCornersTransformation
 import com.hadi.vp2coroutines.databinding.ItemSliderBinding
 
 class SliderAdapter(

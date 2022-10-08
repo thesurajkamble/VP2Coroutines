@@ -1,4 +1,4 @@
-package com.hadi.vp2coroutines
+package com.hadi.vp2coroutines.utils
 
 import android.content.Context
 import android.graphics.Rect

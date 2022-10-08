@@ -1,4 +1,4 @@
-package com.hadi.vp2coroutines.remoteimages
+package com.hadi.vp2coroutines.ui
 
 import android.content.Context
 import android.graphics.Bitmap
